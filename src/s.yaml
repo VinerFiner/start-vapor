@@ -1,0 +1,44 @@
+edition: 1.0.0          #  命令行YAML规范版本，遵循语义化版本（Semantic Versioning）规范
+name: vapor-app       #  项目名称
+access: "{{ access }}"  #  秘钥别名
+
+services:
+  hello-vapor-app: #  服务名称
+    component: fc  # 组件名称
+    actions:
+      pre-deploy:
+        - run: bash build.sh
+          path: ./
+    props: #  组件的属性值
+      region: ${vars.region} # 关于变量的使用方法，可以参考：https://www.serverless-devs.com/serverless-devs/yaml#变量赋值
+      service:
+        name: "{{ serviceName }}"
+        description: 欢迎使用ServerlessTool
+      function:
+        name: "{{ functionName }}"
+        description: 这是一个 vapor 案例
+        codeUri: ./app
+        cAPort: 8080
+        customRuntimeConfig:
+          command:
+            - ./Run
+        handler: index.handler
+        memorySize: 128
+        runtime: custom
+        timeout: 5
+      triggers: # 触发器
+        - name: httpTrigger
+          type: http
+          config:
+            authType: anonymous
+            methods:
+              - GET
+              - POST
+      customDomains:
+        - domainName: auto
+          protocol: HTTP
+          routeConfigs:
+            - path: /*
+              methods:
+                - GET
+                - POST
